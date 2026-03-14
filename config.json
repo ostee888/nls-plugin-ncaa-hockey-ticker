@@ -1,9 +1,5 @@
 {
-  "team_name": "michigan-tech",
+  "teams": ["michigan-tech", "michigan"],
   "lookahead_days": 2,
-  "display_seconds": 8,
-  "show_logos": true,
-  "enabled": true,
-  "display_seconds": 8,
-  "show_background": false
+  "display_seconds": 8
 }
