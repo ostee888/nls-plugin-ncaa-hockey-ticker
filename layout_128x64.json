@@ -1,0 +1,28 @@
+{
+  "_default": {
+    "position": [0, 0],
+    "align": "left-top"
+  },
+  "ticker": {
+    "title": {
+      "position": ["50%", 2],
+      "align": "center-top",
+      "font": "large"
+    },
+    "line1": {
+      "position": ["50%", 20],
+      "align": "center-top",
+      "font": "medium"
+    },
+    "line2": {
+      "position": ["50%", 34],
+      "align": "center-top",
+      "font": "medium"
+    },
+    "line3": {
+      "position": ["50%", 50],
+      "align": "center-top",
+      "font": "small"
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "ncaa_hockey_ticker",
+  "version": "0.1.0",
+  "description": "NCAA hockey ticker board",
+  "author": "HG888",
+  "enabled": true,
+  "boards": [
+    {
+      "id": "ncaa_hockey_ticker",
+      "class_name": "NCAAHockeyTicker",
+      "module": "board"
+    }
+  ]
+}
