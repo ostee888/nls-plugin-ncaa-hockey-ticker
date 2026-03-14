@@ -14,10 +14,9 @@ debug = logging.getLogger("scoreboard")
 
 
 class NCAAHockeyTicker(BoardBase):
-    # Tuned for 128x64 to mimic the NHL scoreboard look
-    LOGO_SIZE = (84, 84)
-    AWAY_LOGO_CENTER_X = 12
-    HOME_LOGO_CENTER_X = 116
+    LOGO_SIZE = (72, 72)
+    AWAY_LOGO_CENTER_X = 5
+    HOME_LOGO_CENTER_X = 123
     LOGO_CENTER_Y = 32
 
     TOP_LINE_Y = 0
@@ -28,12 +27,19 @@ class NCAAHockeyTicker(BoardBase):
 
     def __init__(self, data, matrix, sleepEvent):
         super().__init__(data, matrix, sleepEvent)
+
         self._center_gradient = None
         self.board_name = __board_name__
         self.board_version = __version__
         self.board_description = __description__
 
-        self.team_name = self.get_config_value("team_name", "michigan-tech")
+        raw_teams = self.get_config_value("teams", None)
+        if isinstance(raw_teams, list) and raw_teams:
+            self.teams = [str(team).strip() for team in raw_teams if str(team).strip()]
+        else:
+            fallback_team = self.get_config_value("team_name", "michigan-tech")
+            self.teams = [str(fallback_team).strip()]
+
         self.lookahead_days = int(self.get_config_value("lookahead_days", 2))
         self.display_seconds = int(self.get_config_value("display_seconds", 8))
 
@@ -44,43 +50,57 @@ class NCAAHockeyTicker(BoardBase):
         self._logo_cache = {}
 
         font_dir = self._find_font_dir()
-
         self.font_top = ImageFont.truetype(str(font_dir / "04B_24__.TTF"), 16)
         self.font_small = ImageFont.truetype(str(font_dir / "04B_24__.TTF"), 8)
         self.font_score = ImageFont.truetype(str(font_dir / "score_large.otf"), 32)
-        self.font_big = ImageFont.truetype(str(font_dir / "04B_24__.TTF"), 40)
 
     def render(self):
-        self.matrix.clear()
+        for team_name in self.teams:
+            self.matrix.clear()
 
-        try:
-            snapshot = get_scoreboard_snapshot(
-                team_name=self.team_name,
-                lookahead_days=self.lookahead_days,
-                logo_dir=self.logo_dir,
-            )
-        except Exception as exc:
-            debug.exception("ncaa_hockey_ticker render fetch failed: %s", exc)
-            self._render_error(str(exc))
+            try:
+                snapshot = get_scoreboard_snapshot(
+                    team_name=team_name,
+                    lookahead_days=self.lookahead_days,
+                    logo_dir=self.logo_dir,
+                )
+
+                debug.warning(
+                    "NCAA render team=%s state=%s matchup=%s",
+                    team_name,
+                    snapshot.get("state"),
+                    snapshot.get("matchup_text"),
+                )
+
+            except Exception as exc:
+                debug.exception(
+                    "ncaa_hockey_ticker render fetch failed for %s: %s",
+                    team_name,
+                    exc,
+                )
+                self._render_error(str(exc))
+                self.matrix.render()
+                if self.sleepEvent.wait(self.display_seconds):
+                    return
+                continue
+
+            state = snapshot.get("state", "off_day")
+
+            if state == "scheduled":
+                self._render_scheduled(snapshot)
+            elif state == "live":
+                self._render_live(snapshot)
+            elif state == "final":
+                self._render_final(snapshot)
+            elif state == "postponed":
+                self._render_postponed(snapshot)
+            else:
+                self._render_off_day(snapshot)
+
             self.matrix.render()
-            self.sleepEvent.wait(self.display_seconds)
-            return
 
-        state = snapshot.get("state", "off_day")
-
-        if state == "scheduled":
-            self._render_scheduled(snapshot)
-        elif state == "live":
-            self._render_live(snapshot)
-        elif state == "final":
-            self._render_final(snapshot)
-        elif state == "postponed":
-            self._render_postponed(snapshot)
-        else:
-            self._render_off_day(snapshot)
-
-        self.matrix.render()
-        self.sleepEvent.wait(self.display_seconds)
+            if self.sleepEvent.wait(self.display_seconds):
+                return
 
     def _render_scheduled(self, s):
         top1, top2 = self._scheduled_header_lines(s)
@@ -147,14 +167,12 @@ class NCAAHockeyTicker(BoardBase):
             self._draw_text_at_center_x(101, 22, self._safe_text(s.get("home_abbr")), self.font_score)
 
     def _draw_center_text(self, y: int, text: str, font):
-        if not text:
-            return
-        self.matrix.draw_text_centered(y, text, font, "white")
+        if text:
+            self.matrix.draw_text_centered(y, text, font, "white")
 
     def _draw_text_at_center_x(self, x: int, y: int, text: str, font):
-        if not text:
-            return
-        self.matrix.draw_text((x, y), text, font=font, fill="white", align="center-top")
+        if text:
+            self.matrix.draw_text((x, y), text, font=font, fill="white", align="center-top")
 
     def _scheduled_header_lines(self, s):
         start_dt = s.get("start_dt")
@@ -162,7 +180,6 @@ class NCAAHockeyTicker(BoardBase):
 
         if isinstance(start_dt, datetime):
             now = datetime.now(start_dt.tzinfo) if start_dt.tzinfo else datetime.now()
-
             if start_dt.date() == now.date():
                 top1 = "TODAY"
             elif (start_dt.date() - now.date()).days == 1:
@@ -198,7 +215,6 @@ class NCAAHockeyTicker(BoardBase):
 
     def _find_font_dir(self) -> Path:
         repo_root = Path(__file__).resolve().parents[4]
-
         candidates = [
             Path("/nhl-led/scoreboard/assets/fonts"),
             Path("/home/pi/nhl-led-scoreboard/assets/fonts"),
