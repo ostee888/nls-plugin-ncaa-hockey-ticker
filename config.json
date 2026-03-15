@@ -1,5 +1,5 @@
 {
-  "teams": ["michigan-tech", "michigan"],
+  "teams": ["michigan-tech"],
   "lookahead_days": 2,
   "display_seconds": 8
 }

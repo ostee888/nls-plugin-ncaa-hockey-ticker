@@ -7,6 +7,7 @@ from urllib.parse import quote
 import json
 import logging
 import os
+import re
 
 debug = logging.getLogger("scoreboard")
 
@@ -18,26 +19,12 @@ TIMEOUT_SECONDS = 10
 
 
 def get_team_games(team_name: str, lookahead_days: int = 2) -> List[Dict[str, Any]]:
-    """
-    Fetch NCAA hockey games for today through lookahead_days and return only
-    games involving the requested team slug/name.
-
-    Returns a list of raw game dicts shaped like:
-    {
-        "away": {...},
-        "home": {...},
-        "gameID": "...",
-        "gameState": "...",
-        "startTimeEpoch": "...",
-        ...
-    }
-
-    This is intentionally raw-ish. scoreboard_service.py normalizes it.
-    """
     if not team_name:
         raise ValueError("team_name is required")
 
     slug = _slugify(team_name)
+    loose_slug = _loose_team_slug(team_name)
+
     seen_ids = set()
     matching_games: List[Dict[str, Any]] = []
 
@@ -51,7 +38,7 @@ def get_team_games(team_name: str, lookahead_days: int = 2) -> List[Dict[str, An
             if not isinstance(raw_game, dict):
                 continue
 
-            if not _game_matches_team(raw_game, slug):
+            if not _game_matches_team(raw_game, slug, loose_slug):
                 continue
 
             game_id = str(raw_game.get("gameID") or raw_game.get("id") or "")
@@ -66,8 +53,6 @@ def get_team_games(team_name: str, lookahead_days: int = 2) -> List[Dict[str, An
     return matching_games
 
 
-# Aliases so scoreboard_service.py can find the fetcher even if it probes
-# several possible helper names.
 fetch_team_games = get_team_games
 get_games_for_team = get_team_games
 fetch_games_for_team = get_team_games
@@ -100,7 +85,7 @@ def _fetch_scoreboard_for_date(day: datetime) -> Dict[str, Any]:
     return payload
 
 
-def _game_matches_team(game: Dict[str, Any], team_slug: str) -> bool:
+def _game_matches_team(game: Dict[str, Any], team_slug: str, loose_team_slug: str) -> bool:
     for side in ("home", "away"):
         team = game.get(side, {})
         if not isinstance(team, dict):
@@ -117,7 +102,18 @@ def _game_matches_team(game: Dict[str, Any], team_slug: str) -> bool:
         ]
 
         for candidate in candidates:
-            if candidate and _slugify(candidate) == team_slug:
+            if not candidate:
+                continue
+
+            candidate_slug = _slugify(candidate)
+            candidate_loose = _loose_team_slug(candidate)
+
+            # Exact normalized match
+            if candidate_slug == team_slug:
+                return True
+
+            # Loose match strips qualifiers like "(NY)" and punctuation noise
+            if candidate_loose and candidate_loose == loose_team_slug:
                 return True
 
     return False
@@ -158,3 +154,17 @@ def _slugify(value: Any) -> str:
                 last_dash = True
 
     return "".join(chars).strip("-")
+
+
+def _loose_team_slug(value: Any) -> str:
+    text = str(value or "").strip().lower()
+
+    # Remove parenthetical qualifiers like "(ny)"
+    text = re.sub(r"\([^)]*\)", "", text)
+
+    # Remove common punctuation leftovers
+    text = re.sub(r"[^\w\s-]", " ", text)
+
+    # Collapse whitespace/hyphens
+    parts = [p for p in re.split(r"[\s\-_]+", text) if p]
+    return "-".join(parts)

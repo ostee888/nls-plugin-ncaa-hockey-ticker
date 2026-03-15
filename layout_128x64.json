@@ -1,28 +1,89 @@
 {
-  "_default": {
-    "position": [0, 0],
-    "align": "left-top"
-  },
-  "ticker": {
-    "title": {
-      "position": ["50%", 2],
-      "align": "center-top",
-      "font": "large"
+  "ncaa_scoreboard": {
+    "logo_size": {
+      "width": 76,
+      "height": 76
     },
-    "line1": {
-      "position": ["50%", 20],
-      "align": "center-top",
-      "font": "medium"
+
+    "away_logo": {
+      "x": 14,
+      "y": 32
     },
-    "line2": {
-      "position": ["50%", 34],
-      "align": "center-top",
-      "font": "medium"
+    "home_logo": {
+      "x": 114,
+      "y": 32
     },
-    "line3": {
-      "position": ["50%", 50],
-      "align": "center-top",
-      "font": "small"
+    "center_gradient": {
+      "x": 64,
+      "y": 32
+    },
+
+    "scheduled_date": {
+      "x": 64,
+      "y": 8
+    },
+    "scheduled_time": {
+      "x": 64,
+      "y": 20
+    },
+    "vs": {
+      "x": 64,
+      "y": 44
+    },
+
+    "period": {
+      "x": 64,
+      "y": 8
+    },
+    "clock": {
+      "x": 64,
+      "y": 20
+    },
+
+    "final": {
+      "x": 66,
+      "y": 8
+    },
+    "postponed": {
+      "x": 64,
+      "y": 8
+    },
+
+    "away_score": {
+      "x": 52,
+      "y": 40
+    },
+    "dash": {
+      "x": 64,
+      "y": 40,
+      "width": 10,
+      "height": 2
+    },
+    "home_score": {
+      "x": 76,
+      "y": 40
+    },
+
+    "off_day_title": {
+      "x": 64,
+      "y": 8
+    },
+    "off_day_opponent": {
+      "x": 64,
+      "y": 34
+    },
+    "off_day_time": {
+      "x": 64,
+      "y": 54
+    },
+
+    "error_title": {
+      "x": 64,
+      "y": 8
+    },
+    "error_message": {
+      "x": 64,
+      "y": 42
     }
   }
 }

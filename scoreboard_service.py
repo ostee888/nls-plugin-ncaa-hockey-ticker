@@ -9,6 +9,7 @@ try:
     from zoneinfo import ZoneInfo
 except ImportError:  # pragma: no cover
     ZoneInfo = None
+
 try:
     from . import ncaa_api
     from . import logo_service
@@ -25,19 +26,6 @@ def get_scoreboard_snapshot(
     logo_dir=None,
     now: Optional[datetime] = None,
 ) -> Dict[str, Any]:
-    """
-    Return one normalized snapshot dict for the board renderer.
-
-    Expected raw input:
-    - Your ncaa_api.py should expose one of these helpers:
-      get_team_games, fetch_team_games, get_games_for_team,
-      fetch_games_for_team, get_schedule_for_team, fetch_schedule_for_team,
-      get_schedule, fetch_schedule
-    - That helper should return either:
-      * a list of raw game dicts, or
-      * a dict containing a game list under one of:
-        games, events, data, scoreboard, contests
-    """
     if not team_name:
         raise ValueError("team_name is required")
 
@@ -50,41 +38,67 @@ def get_scoreboard_snapshot(
     if not games:
         return _off_day_snapshot(team_name, None)
 
-    live_games = [g for g in games if g["state"] == "live"]
-    if live_games:
-        chosen = live_games[0]
-        _attach_logo_paths(chosen, logo_dir)
-        return chosen
-
-    scheduled_games = [
+    # Group by LOCAL game date
+    todays_games = [
         g
         for g in games
-        if g["state"] == "scheduled"
-        and g["start_dt"] is not None
-        and g["start_dt"] >= local_now - timedelta(hours=4)
-    ]
-    if scheduled_games:
-        chosen = scheduled_games[0]
-        _attach_logo_paths(chosen, logo_dir)
-        return chosen
-
-    final_games_today = [
-        g
-        for g in games
-        if g["state"] == "final"
-        and g["start_dt"] is not None
+        if g["start_dt"] is not None
         and g["start_dt"].astimezone(_local_tz()).date() == local_now.date()
     ]
-    if final_games_today:
-        chosen = final_games_today[-1]
+
+    # Priority 1: if there is ANY game today, keep the board on today's game
+    # until the date rolls over, regardless of whether it is scheduled, live, or final.
+    if todays_games:
+        todays_live = [g for g in todays_games if g["state"] == "live"]
+        if todays_live:
+            chosen = todays_live[0]
+            _attach_logo_paths(chosen, logo_dir)
+            return chosen
+
+        todays_final = [g for g in todays_games if g["state"] == "final"]
+        if todays_final:
+            # If multiple somehow exist, keep the latest one from today.
+            chosen = todays_final[-1]
+            _attach_logo_paths(chosen, logo_dir)
+            return chosen
+
+        todays_postponed = [g for g in todays_games if g["state"] == "postponed"]
+        if todays_postponed:
+            chosen = todays_postponed[0]
+            _attach_logo_paths(chosen, logo_dir)
+            return chosen
+
+        todays_scheduled = [g for g in todays_games if g["state"] == "scheduled"]
+        if todays_scheduled:
+            chosen = todays_scheduled[0]
+            _attach_logo_paths(chosen, logo_dir)
+            return chosen
+
+        # Fallback: if something from today exists but state didn't match expected buckets
+        chosen = todays_games[0]
         _attach_logo_paths(chosen, logo_dir)
         return chosen
 
-    future_games = [g for g in games if g["start_dt"] is not None and g["start_dt"] > local_now]
+    # Priority 2: no game today, so show the next future game
+    future_games = [
+        g for g in games
+        if g["start_dt"] is not None and g["start_dt"] > local_now
+    ]
     if future_games:
-        return _off_day_snapshot(team_name, future_games[0])
+        chosen = future_games[0]
+        _attach_logo_paths(chosen, logo_dir)
+        return chosen
 
-    return games[-1]
+    # Priority 3: if no future games exist in the window, show the most recent result
+    final_games = [g for g in games if g["state"] == "final"]
+    if final_games:
+        chosen = final_games[-1]
+        _attach_logo_paths(chosen, logo_dir)
+        return chosen
+
+    chosen = games[-1]
+    _attach_logo_paths(chosen, logo_dir)
+    return chosen
 
 
 def _fetch_raw_games(team_name: str, lookahead_days: int) -> List[Dict[str, Any]]:
@@ -206,7 +220,6 @@ def _normalize_game(raw: Dict[str, Any], tracked_team_slug: str) -> Optional[Dic
 
     epoch = _pick(raw, "startTimeEpoch", "gameTimeEpoch", "epoch")
     start_dt = _parse_datetime(epoch)
-
     if start_dt is None:
         start_dt = _parse_datetime(
             _pick(
@@ -352,19 +365,24 @@ def _extract_team(container: Any, side: Optional[str]) -> Optional[Dict[str, Any
 
 
 def _extract_period_clock(raw: Dict[str, Any]) -> str:
-    direct = _pick(raw, "periodClock", "clock", "displayClock", "gameClock")
-    if direct:
-        period = _pick(raw, "period", "currentPeriod", "ordinal")
-        if period:
-            return f"{period} {direct}".strip()
-        return str(direct)
+    period = _pick(raw, "currentPeriod", "period", "ordinal", "finalMessage")
+    clock = _pick(raw, "contestClock", "periodClock", "clock", "displayClock", "gameClock")
+
+    if period and clock:
+        return f"{period} {clock}".strip()
+    if period:
+        return str(period)
+    if clock:
+        return str(clock)
 
     status = raw.get("status")
     if isinstance(status, dict):
-        period = _pick(status, "period", "ordinal", "displayPeriod")
-        clock = _pick(status, "clock", "displayClock")
+        period = _pick(status, "period", "ordinal", "displayPeriod", "currentPeriod")
+        clock = _pick(status, "contestClock", "clock", "displayClock", "gameClock")
         if period and clock:
             return f"{period} {clock}".strip()
+        if period:
+            return str(period)
         if clock:
             return str(clock)
 
@@ -388,7 +406,7 @@ def _normalize_state(value: Any) -> str:
 
 def _build_status_text(state: str, raw: Dict[str, Any], start_dt: Optional[datetime], period_clock: str) -> str:
     if state == "live":
-        return period_clock or str(_pick(raw, "status", "gameStatus", default="LIVE"))
+        return period_clock or str(_pick(raw, "currentPeriod", "finalMessage", "status", "gameStatus", default="LIVE"))
     if state == "final":
         final_label = _pick(raw, "finalLabel", "result", default="FINAL")
         return str(final_label or "FINAL").upper()

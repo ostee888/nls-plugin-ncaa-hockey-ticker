@@ -1,8 +1,5 @@
 {
-  "teams": ["michigan-tech", "michigan"],
+  "teams": ["michigan-tech"],
   "lookahead_days": 2,
-  "display_seconds": 8,
-  "show_logos": true,
-  "enabled": true,
-  "description": "Configuration for the NCAA hockey ticker plugin"
+  "display_seconds": 8
 }
