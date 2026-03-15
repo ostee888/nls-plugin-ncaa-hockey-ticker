@@ -69,3 +69,9 @@ The size of the logos for the teams can be modified by changing the "width" and 
 ```
 
 The rest of the elements X and Y coordinates can be adjusted to make everything look the way you want. All coordinates reference the horizontal and vertical CENTER of the object.
+
+### Current Limitations
+- Only able to display NCAA D1 Men's Ice Hockey - integration  for D3 and Women's coming soon
+- If no game is found for ONE of the teams, a blank no games found board will display. This will be changed to look nicer OR not show that particular team/board.
+
+
