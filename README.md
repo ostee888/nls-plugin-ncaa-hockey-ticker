@@ -14,12 +14,13 @@ To install the plugin onto the NHL-LED-SCOREBOARD, log into your NLS Control Hub
 
 ### Setting Your Team(s) to Display
 
-This plugin allows for one or multiple teams to be displayed on the scoreboard. To add teams you must look up their NCAA website name. This can be done by looking on the Scores or Rankings page and copying the name.
+This plugin allows for one or multiple teams to be displayed on the scoreboard. To add teams you must look up their NCAA website name. This can be done by looking on the Scores or Rankings page and copying the name. https://www.ncaa.com/scoreboard/icehockey-men/d1
 
 __Example:__
 ```json
 {
-Test 123
+Michigan State = Michigan St.
+St. Thomas = St. Thomas (MN)
 }
 ```
 ### plugin.json - Metadata
