@@ -19,7 +19,7 @@ This plugin allows for one or multiple teams to be displayed on the scoreboard. 
 __Example:__
 ```
 Michigan State = Michigan St.
-St. Thomas = St. Thomas (MN)
+Saint Thomas = St. Thomas (MN)
 ```
 
 ### 2) Add Names to the Config.json
@@ -28,6 +28,32 @@ In the terminal, navigate to the plugins folder. From the nhl-led-scoreboard dir
 ```
 cd src/boards/plugins/ncaa-hockey-ticker
 ```
+
+Modify the teams array with the name(s) you want to display.
+
+__Single Team__
+
+config.json
+```json
+{
+  "teams": ["michigan-tech"],
+  "lookahead_days": 2,
+  "display_seconds": 8
+}
+```
+__Multiple Teams__
+
+config.json
+```json
+{
+  "teams": ["michigan-tech","Quinnipiac","Michigan"],
+  "lookahead_days": 2,
+  "display_seconds": 8
+}
+```
+Other options in the config.json include the days into the future the board looks for new games. Display seconds is the time each board is displayed (per team).
+
+
 
 ### plugin.json - Metadata
 
