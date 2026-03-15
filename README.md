@@ -2,7 +2,7 @@
  
 ## Table of Contents
 
-- [Using This Plugin](#using-this-plugin)
+- [Installing the Plugin](#installing-the-plugin)
 - [Plugin Development Guide](#plugin-development-guide)
   - [Required Files](#required-files)
   - [Plugin Structure](#plugin-structure)
@@ -14,10 +14,9 @@
 - [Creating Your Own Plugin](#creating-your-own-plugin)
 - [Best Practices](#best-practices)
 
-## Using This Plugin
+## Installing The Plugin
 
-This plugin is included with the NHL LED Scoreboard as an example. To enable it:
-
+To install the plugin onto the NHL-LED-SCOREBOARD, log into your NLS Control Hub (IP ADDRESS:8000), and go to the plugins tab. Copy the 
 ### 1. Copy Configuration
 
 ```bash
