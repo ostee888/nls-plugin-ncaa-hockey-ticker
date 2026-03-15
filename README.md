@@ -36,7 +36,7 @@ __Single Team__
 config.json
 ```json
 {
-  "teams": ["michigan-tech"],
+  "teams": ["Michigan Tech"],
   "lookahead_days": 2,
   "display_seconds": 8
 }
@@ -46,7 +46,7 @@ __Multiple Teams__
 config.json
 ```json
 {
-  "teams": ["michigan-tech","Quinnipiac","Michigan"],
+  "teams": ["Michigan Tech","Quinnipiac","Michigan"],
   "lookahead_days": 2,
   "display_seconds": 8
 }
