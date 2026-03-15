@@ -3,8 +3,7 @@
 ## Table of Contents
 
 - [Installing the Plugin](#installing-the-plugin)
-- [Setting Your Teams](#setting-your-teams)
-  - [Required Files](#required-files)
+- [Setting Your Team(s) To Display](#Setting-Your-Team(s)-to-Display)
 
 
 ## Installing The Plugin
@@ -14,15 +13,22 @@ To install the plugin onto the NHL-LED-SCOREBOARD, log into your NLS Control Hub
 
 ### Setting Your Team(s) to Display
 
+### 1) Getting The Name
 This plugin allows for one or multiple teams to be displayed on the scoreboard. To add teams you must look up their NCAA website name. This can be done by looking on the Scores or Rankings page and copying the name. https://www.ncaa.com/scoreboard/icehockey-men/d1
 
 __Example:__
-```json
-{
+```
 Michigan State = Michigan St.
 St. Thomas = St. Thomas (MN)
-}
 ```
+
+### 2) Add Names to the Config.json
+
+In the terminal, navigate to the plugins folder. From the nhl-led-scoreboard directory run:
+```
+cd src/boards/plugins/ncaa-hockey-ticker
+```
+
 ### plugin.json - Metadata
 
 The `plugin.json` file defines all plugin metadata and is __required__ for every plugin.
