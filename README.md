@@ -1,7 +1,5 @@
-# Example Board Plugin
-
-A simple example board plugin demonstrating the NHL LED Scoreboard plugin architecture. This serves as both a working example and a comprehensive development guide for creating your own plugins.
-
+# NCAA Hockey Ticker Plugin
+ 
 ## Table of Contents
 
 - [Using This Plugin](#using-this-plugin)
