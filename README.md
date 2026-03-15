@@ -37,7 +37,7 @@ config.json
 ```json
 {
   "teams": ["Michigan Tech"],
-  "lookahead_days": 2,
+  "lookahead_days": 6,
   "display_seconds": 8
 }
 ```
@@ -47,7 +47,7 @@ config.json
 ```json
 {
   "teams": ["Michigan Tech","Quinnipiac","Michigan","St. Thomas (MN)"],
-  "lookahead_days": 2,
+  "lookahead_days": 6,
   "display_seconds": 8
 }
 ```
