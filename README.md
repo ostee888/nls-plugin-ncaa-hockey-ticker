@@ -3,85 +3,25 @@
 ## Table of Contents
 
 - [Installing the Plugin](#installing-the-plugin)
-- [Plugin Development Guide](#plugin-development-guide)
+- [Setting Your Teams](#setting-your-teams)
   - [Required Files](#required-files)
-  - [Plugin Structure](#plugin-structure)
-  - [plugin.json - Metadata](#pluginjson---metadata)
-  - [\_\_init\_\_.py - Module Initialization](#__init__py---module-initialization)
-  - [board.py - Implementation](#boardpy---implementation)
-  - [Configuration Files](#configuration-files)
-  - [Layout Files](#layout-files)
-- [Creating Your Own Plugin](#creating-your-own-plugin)
-- [Best Practices](#best-practices)
+
 
 ## Installing The Plugin
 
-To install the plugin onto the NHL-LED-SCOREBOARD, log into your NLS Control Hub (IP ADDRESS:8000), and go to the plugins tab. Copy the 
-### 1. Copy Configuration
+To install the plugin onto the NHL-LED-SCOREBOARD, log into your NLS Control Hub (IP ADDRESS:8000), and go to the plugins tab. Copy the link "https://github.com/ostee888/nls-plugin-ncaa-hockey-ticker" and paste it into the URL section. Then press Add Plugin. 
 
-```bash
-cd src/boards/plugins/example_board
-cp config.sample.json config.json
-nano config.json
-```
 
-### 2. Configure Display
+### Setting Your Team(s) to Display
 
-Edit the configuration options:
+This plugin allows for one or multiple teams to be displayed on the scoreboard. To add teams you must look up their NCAA website name. This can be done by looking on the Scores or Rankings page and copying the name.
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `message` | String | "Plugin System Works!" | Custom message to display |
-| `text_color` | String | "cyan" | Color of the message text |
-| `display_seconds` | Integer | 5 | Seconds to display the board |
-| `enabled` | Boolean | true | Enable/disable the board |
-
-### 3. Add to Board Rotation
-
-Edit `config/config.json` to add the plugin to your board rotation:
-
+__Example:__
 ```json
-"states": {
-    "off_day": [
-        "example_board",
-        "clock",
-        "scoreticker"
-    ]
+{
+Test 123
 }
 ```
-
-### 4. Restart Scoreboard
-
-```bash
-sudo systemctl restart nhl-scoreboard
-```
-
----
-
-## Plugin Development Guide
-
-This section provides comprehensive documentation for developing your own plugins.
-
-### Required Files
-
-Every plugin must contain these files:
-
-```text
-my_custom_board/
-├── plugin.json          # Plugin metadata (REQUIRED)
-├── __init__.py          # Module initialization
-├── board.py             # Board implementation
-├── config.sample.json   # Sample configuration (REQUIRED)
-├── config.json          # User configuration (created by user)
-├── layout_64x32.json    # Layout for 64x32 displays (optional)
-├── layout_128x64.json   # Layout for 128x64 displays (optional)
-└── README.md            # Plugin documentation (recommended)
-```
-
-### Plugin Structure
-
-The NHL LED Scoreboard uses a metadata-driven plugin architecture where `plugin.json` is the single source of truth for all plugin information.
-
 ### plugin.json - Metadata
 
 The `plugin.json` file defines all plugin metadata and is __required__ for every plugin.
