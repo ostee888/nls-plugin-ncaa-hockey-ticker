@@ -57,7 +57,7 @@ Other options in the config.json include the days into the future the board look
 
 ### Layout Options
 
-The layout_128x64.json includes the locations of all the text elements along with the size of the images.
+The layout_128x64.json includes the locations of all the text elements along with the size of the logos.
 
 The size of the logos for the teams can be modified by changing the "width" and "height".
 ```json
